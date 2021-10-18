@@ -27,7 +27,7 @@ class _OurLoginFormState extends State<OurLoginForm> {
           MaterialPageRoute(builder: (context) => HomeScreen()),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text("Invalid email or password!"),
         ));
       }
@@ -64,7 +64,7 @@ class _OurLoginFormState extends State<OurLoginForm> {
             controller: _passwordController,
             decoration: const InputDecoration(
                 prefixIcon: Icon(Icons.lock_outline), hintText: "Password"),
-            obscureText: true,
+            //obscureText: true,
           ),
           const SizedBox(height: 20.0),
           ElevatedButton(

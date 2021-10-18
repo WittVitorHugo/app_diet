@@ -19,18 +19,12 @@ class _OurSignupFormState extends State<OurSignupForm> {
   TextEditingController _passwordController = TextEditingController();
   TextEditingController _confirmPasswordController = TextEditingController();
 
-  void _signUpUser(String email, String password, BuildContext context) async {
-    await Firebase.initializeApp();
-
+  Future<void> _signUpUser(
+      String email, String password, BuildContext context) async {
     CurrentUser _currentUser = Provider.of<CurrentUser>(context, listen: false);
-
     try {
       if (await _currentUser.signUpUser(email, password)) {
         Navigator.pop(context);
-      } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("Passwords do not match")));
-        duration: Duration(seconds: 2);
       }
     } catch (e) {
       print(e);
@@ -80,7 +74,7 @@ class _OurSignupFormState extends State<OurSignupForm> {
               prefixIcon: Icon(Icons.lock_outline),
               hintText: "Password",
             ),
-            obscureText: true,
+            //obscureText: true,
           ),
           const SizedBox(
             height: 20.0,
@@ -91,7 +85,7 @@ class _OurSignupFormState extends State<OurSignupForm> {
               prefixIcon: Icon(Icons.lock_open),
               hintText: "Confirm Password",
             ),
-            obscureText: true,
+            //obscureText: true,
           ),
           const SizedBox(
             height: 20.0,
@@ -102,8 +96,15 @@ class _OurSignupFormState extends State<OurSignupForm> {
               child: Text("Sign Up"),
             ),
             onPressed: () {
-              _signUpUser(
-                  _emailController.text, _passwordController.text, context);
+              if (_passwordController.text == _confirmPasswordController.text) {
+                _signUpUser(
+                    _emailController.text, _passwordController.text, context);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text("Password do not match!"),
+                  duration: Duration(seconds: 2),
+                ));
+              }
             },
           ),
         ],
