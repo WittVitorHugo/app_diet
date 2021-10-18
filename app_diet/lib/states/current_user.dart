@@ -3,29 +3,50 @@ import 'package:flutter/cupertino.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:app_diet/models/user.dart';
+
 class CurrentUser extends ChangeNotifier {
-  late String _uid;
-  late String _email;
+  late OurUser _currentUser;
 
-  String get getUid => _uid;
+  OurUser get getCurrentUser => _currentUser;
 
-  String get getEmail => _email;
+  Future<String> onStartUp() async {
+    String retVal = "error";
+
+    try {
+      User _firebaseUser = await FirebaseAuth.instance.currentUser;
+      _currentUser.uid = _firebaseUser.uid;
+      _currentUser.email = _firebaseUser.email;
+      retVal = "success";
+    } catch (e) {
+      print(e);
+    }
+
+    return retVal;
+  }
+
+  Future<String> signOut() async {
+    String retVal = "error";
+
+    try {
+      await FirebaseAuth.instance.signOut();
+      retVal = "success";
+    } catch (e) {
+      print(e);
+    }
+
+    return retVal;
+  }
 
   Future<bool> signUpUser(String email, String password) async {
     bool retValue = false;
-
+    
     try {
-      UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-              email: email,
-              password: password);
-      if (userCredential.user != null) {
-        _uid = userCredential.user.uid;
-        _email = userCredential.user.email;
+      UserCredential _userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+      if (_userCredential.user != null) {
         retValue = true;
       }
-    } on FirebaseAuthException catch (e) {
-      print(e);
     } catch (e) {
       print(e);
     }
@@ -36,12 +57,12 @@ class CurrentUser extends ChangeNotifier {
     bool retValue = false;
 
     try {
-      UserCredential _authResult = await FirebaseAuth.instance
+      UserCredential _userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
-      if (_authResult.user != null) {
-        _uid = _authResult.user.uid;
-        _email = _authResult.user.email;
+      if (_userCredential.user != null) {
+        _currentUser.uid = _userCredential.user.uid;
+        _currentUser.email = _userCredential.user.email;
         retValue = true;
       }
     } catch (e) {
