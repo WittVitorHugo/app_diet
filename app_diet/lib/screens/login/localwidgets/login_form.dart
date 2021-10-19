@@ -6,6 +6,11 @@ import 'package:app_diet/screens/signup/signup.dart';
 import 'package:app_diet/widgets/our_container.dart';
 import 'package:provider/provider.dart';
 
+enum LoginType {
+  email,
+  google,
+}
+
 class OurLoginForm extends StatefulWidget {
   const OurLoginForm({Key? key}) : super(key: key);
 
@@ -18,22 +23,67 @@ class _OurLoginFormState extends State<OurLoginForm> {
   TextEditingController _passwordController = TextEditingController();
 
   Future<void> _loginUser(
-      String email, String password, BuildContext context) async {
+      {required LoginType type,
+      required String email,
+      required String password,
+      required BuildContext context}) async {
     CurrentUser _currentUser = Provider.of<CurrentUser>(context, listen: false);
 
     try {
-      if (await _currentUser.loginUser(email, password)) {
+      String _returnString = '';
+
+      switch (type) {
+        case LoginType.email:
+          _returnString = await _currentUser.loginUserWithEmail(email, password);
+          break;
+        case LoginType.google:
+          _returnString = await _currentUser.loginUserWithGoogle(email, password);
+          break;
+      }
+
+      
+      if (_returnString == "success") {
         Navigator.of(context).push(
           MaterialPageRoute(builder: (context) => HomeScreen()),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("Invalid email or password!"),
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(_returnString),
+          duration: const Duration(seconds: 2),
         ));
       }
     } catch (e) {
       print(e);
     }
+  }
+
+  Widget _googleButton() {
+    return OutlinedButton(
+      onPressed: () {
+        _loginUser(
+            type: LoginType.google, context: context, email: '', password: '',);
+      },
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const <Widget>[
+            Image(
+              image: AssetImage("assets/google_logo.png"),
+              height: 25.0,
+            ),
+            Padding(
+              padding: EdgeInsets.only(left: 10),
+              child: Text(
+                'Sign in with Google',
+                style: TextStyle(fontSize: 20, color: Colors.grey),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -81,7 +131,10 @@ class _OurLoginFormState extends State<OurLoginForm> {
             ),
             onPressed: () {
               _loginUser(
-                  _emailController.text, _passwordController.text, context);
+                  type: LoginType.email,
+                  email: _emailController.text,
+                  password: _passwordController.text,
+                  context: context);
             },
           ),
           MaterialButton(
@@ -95,6 +148,7 @@ class _OurLoginFormState extends State<OurLoginForm> {
               );
             },
           ),
+          _googleButton(),
         ],
       ),
     );

@@ -1,12 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:app_diet/models/user.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class CurrentUser extends ChangeNotifier {
-  late OurUser _currentUser;
+  final OurUser _currentUser = OurUser(
+      uid: '', fullName: '', email: '', accountCreated: Timestamp.now());
 
   OurUser get getCurrentUser => _currentUser;
 
@@ -38,33 +41,55 @@ class CurrentUser extends ChangeNotifier {
     return retVal;
   }
 
-  Future<bool> signUpUser(String email, String password) async {
-    bool retValue = false;
-    
+  Future<String> signUpUser(String email, String password) async {
+    String retValue = "error";
+
+    try {
+      await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+      retValue = "success";
+    } on FirebaseAuthException catch (e) {
+      retValue = e.message;
+    }
+    return retValue;
+  }
+
+  Future<String> loginUserWithEmail(String email, String password) async {
+    String retValue = "error";
+
     try {
       UserCredential _userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
-      if (_userCredential.user != null) {
-        retValue = true;
-      }
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      _currentUser.uid = _userCredential.user.uid;
+      _currentUser.email = _userCredential.user.email;
+      retValue = "success";
     } catch (e) {
       print(e);
     }
     return retValue;
   }
 
-  Future<bool> loginUser(String email, String password) async {
-    bool retValue = false;
+  Future<String> loginUserWithGoogle(String email, String password) async {
+    String retValue = "error";
+    GoogleSignIn _googleSignIn = GoogleSignIn(
+      scopes: [
+        'email',
+        'https://www.googleapis.com/auth/contacts.readonly',
+      ],
+    );
 
     try {
-      UserCredential _userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
+      GoogleSignInAccount _googleUser = await _googleSignIn.signIn();
+      GoogleSignInAuthentication _googleAuth = await _googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+          idToken: _googleAuth.idToken, accessToken: _googleAuth.accessToken);
+      UserCredential _userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
 
-      if (_userCredential.user != null) {
-        _currentUser.uid = _userCredential.user.uid;
-        _currentUser.email = _userCredential.user.email;
-        retValue = true;
-      }
+      _currentUser.uid = _userCredential.user.uid;
+      _currentUser.email = _userCredential.user.email;
+      retValue = "success";
     } catch (e) {
       print(e);
     }
