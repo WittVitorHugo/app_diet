@@ -23,7 +23,8 @@ class _OurSignupFormState extends State<OurSignupForm> {
       String email, String password, BuildContext context) async {
     CurrentUser _currentUser = Provider.of<CurrentUser>(context, listen: false);
     try {
-      if (await _currentUser.signUpUser(email, password)) {
+      String _returnString = await _currentUser.signUpUser(email, password);
+      if (_returnString == "success") {
         Navigator.pop(context);
       }
     } catch (e) {
