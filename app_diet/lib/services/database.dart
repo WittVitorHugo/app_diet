@@ -7,13 +7,26 @@ class OurDatabase {
 
   Future<String> createUser(OurUser user) async {
     String retVal = "error";
-
     try {
       await _firestore.collection("users").doc(user.uid).set({
         'fullName': user.uid,
         'email': user.email,
         'accountCreated': Timestamp.now(),
       });
+      retVal = "success";
+    } catch (e) {
+      print(e);
+    }
+    return retVal;
+  }
+
+  Future<OurUser> getUserInfo(String uid) async {
+    OurUser retVal = OurUser(uid: uid, email: '', fullName: '', accountCreated: Timestamp.now());
+    try {
+      DocumentSnapshot _docSnapshot = await _firestore.collection("users").doc(uid).get();
+      retVal.uid = uid;
+      retVal.fullName = _docSnapshot.data()["fullName"];
+      retVal.accountCreated = _docSnapshot.data()["accountCreated"];
     } catch (e) {
       print(e);
     }
