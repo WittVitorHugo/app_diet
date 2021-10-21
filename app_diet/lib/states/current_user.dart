@@ -10,8 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class CurrentUser extends ChangeNotifier {
-  OurUser _currentUser = OurUser(
-      uid: '', fullName: '', email: '', accountCreated: Timestamp.now());
+  OurUser _currentUser = OurUser(uid: '', fullName: '', email: '', accountCreated: Timestamp.now(), groupId: '');
 
   OurUser get getCurrentUser => _currentUser;
 
@@ -36,8 +35,7 @@ class CurrentUser extends ChangeNotifier {
 
     try {
       await FirebaseAuth.instance.signOut();
-      _currentUser = OurUser(
-          fullName: '', uid: '', email: '', accountCreated: Timestamp.now());
+      _currentUser = OurUser(uid: '', fullName: '', email: '', accountCreated: Timestamp.now(), groupId: '');
       retVal = "success";
     } catch (e) {
       print(e);
@@ -49,13 +47,8 @@ class CurrentUser extends ChangeNotifier {
   Future<String> signUpUser(
       String email, String password, String fullName) async {
     String retVal = "error";
-    OurUser _user = OurUser(
-      uid: '',
-      fullName: '',
-      email: '',
-      accountCreated: Timestamp.now(),
-    );
-
+    OurUser _user = OurUser(uid: '', fullName: '', email: '', accountCreated: Timestamp.now(), groupId: '');
+  
     try {
       UserCredential _userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);

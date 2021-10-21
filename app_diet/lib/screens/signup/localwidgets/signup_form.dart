@@ -101,7 +101,7 @@ class _OurSignupFormState extends State<OurSignupForm> {
                 _signUpUser(
                     _emailController.text, _passwordController.text, _fullNameController.text, context);
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                   content: Text("Password do not match!"),
                   duration: Duration(seconds: 2),
                 ));
