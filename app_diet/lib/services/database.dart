@@ -9,7 +9,7 @@ class OurDatabase {
     String retVal = "error";
     try {
       await _firestore.collection("users").doc(user.uid).set({
-        'fullName': user.uid,
+        'fullName': user.fullName,
         'email': user.email,
         'accountCreated': Timestamp.now(),
       });
@@ -21,12 +21,13 @@ class OurDatabase {
   }
 
   Future<OurUser> getUserInfo(String uid) async {
-    OurUser retVal = OurUser(uid: uid, email: '', fullName: '', accountCreated: Timestamp.now());
+    OurUser retVal = OurUser(uid: uid, email: '', fullName: '', accountCreated: Timestamp.now(), groupId: '');
     try {
       DocumentSnapshot _docSnapshot = await _firestore.collection("users").doc(uid).get();
       retVal.uid = uid;
       retVal.fullName = _docSnapshot.data()["fullName"];
       retVal.accountCreated = _docSnapshot.data()["accountCreated"];
+      retVal.groupId = _docSnapshot.data()["groupId"];
     } catch (e) {
       print(e);
     }
